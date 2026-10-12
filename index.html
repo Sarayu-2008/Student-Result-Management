@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Result Management System</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px #ccc;
+}
+h1, h2 {
+    text-align: center;
+    color: #174a7e;
+}
+label {
+    display: block;
+    margin-top: 12px;
+    font-weight: bold;
+}
+input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.marks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 20px;
+}
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+button {
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    background: #1769aa;
+    color: white;
+    cursor: pointer;
+    flex: 1;
+}
+button:hover {
+    background: #104d80;
+}
+.clear {
+    background: #6c757d;
+}
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+th {
+    background: #1769aa;
+    color: white;
+}
+tr:nth-child(even) {
+    background: #f2f6fa;
+}
+.pass {
+    color: green;
+    font-weight: bold;
+}
+.fail {
+    color: red;
+    font-weight: bold;
+}
+#message {
+    text-align: center;
+    font-weight: bold;
+}
+.error {
+    color: red;
+}
+.success {
+    color: green;
+}
+@media (max-width: 600px) {
+    .marks {
+        grid-template-columns: 1fr;
+    }
+    .container {
+        padding: 15px;
+    }
+    h1 {
+        font-size: 23px;
+    }
+    .buttons {
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h1>Student Result Management System</h1>
+
+    <form id="resultForm">
+        <label for="roll">Roll Number:</label>
+        <input type="text" id="roll" required>
+
+        <label for="name">Student Name:</label>
+        <input type="text" id="name" required>
+
+        <h3>Enter Subject Marks (Out of 100)</h3>
+
+        <div class="marks">
+            <div>
+                <label for="m1">Mathematics:</label>
+                <input type="number" id="m1" min="0" max="100" required>
+            </div>
+            <div>
+                <label for="m2">Physics:</label>
+                <input type="number" id="m2" min="0" max="100" required>
+            </div>
+            <div>
+                <label for="m3">Chemistry:</label>
+                <input type="number" id="m3" min="0" max="100" required>
+            </div>
+            <div>
+                <label for="m4">English:</label>
+                <input type="number" id="m4" min="0" max="100" required>
+            </div>
+            <div>
+                <label for="m5">Computer Science:</label>
+                <input type="number" id="m5" min="0" max="100" required>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button type="submit">Calculate Result</button>
+            <button type="reset" class="clear">Clear Form</button>
+        </div>
+    </form>
+
+    <p id="message" role="alert"></p>
+
+    <section id="resultSection" hidden>
+        <h2>Student Results</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roll No.</th>
+                        <th>Name</th>
+                        <th>Maths</th>
+                        <th>Physics</th>
+                        <th>Chemistry</th>
+                        <th>English</th>
+                        <th>Computer</th>
+                        <th>Total</th>
+                        <th>Percentage</th>
+                        <th>Grade</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody id="resultBody"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script>
+const form = document.getElementById("resultForm");
+const resultBody = document.getElementById("resultBody");
+const resultSection = document.getElementById("resultSection");
+const message = document.getElementById("message");
+
+form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const roll = document.getElementById("roll").value.trim();
+    const name = document.getElementById("name").value.trim();
+    const marks = [];
+
+    for (let i = 1; i <= 5; i++) {
+        const input = document.getElementById("m" + i);
+        const value = input.value;
+        const mark = Number(value);
+
+        if (value === "" || !Number.isFinite(mark) ||
+            mark < 0 || mark > 100) {
+            message.textContent = "Enter valid marks between 0 and 100.";
+            message.className = "error";
+            input.focus();
+            return;
+        }
+
+        marks.push(mark);
+    }
+
+    if (!roll || !name) {
+        message.textContent = "Please enter student details.";
+        message.className = "error";
+        return;
+    }
+
+    const total = marks.reduce((sum, mark) => sum + mark, 0);
+    const percentage = total / 5;
+
+    let grade;
+    if (percentage >= 90) grade = "A+";
+    else if (percentage >= 80) grade = "A";
+    else if (percentage >= 70) grade = "B";
+    else if (percentage >= 60) grade = "C";
+    else if (percentage >= 50) grade = "D";
+    else grade = "F";
+
+    const passed = marks.every(mark => mark >= 35);
+    const status = passed ? "PASS" : "FAIL";
+
+    const values = [
+        roll, name, ...marks,
+        total + "/500",
+        percentage.toFixed(2) + "%",
+        grade, status
+    ];
+
+    const row = document.createElement("tr");
+
+    values.forEach((value, index) => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+
+        if (index === values.length - 1) {
+            cell.className = passed ? "pass" : "fail";
+        }
+
+        row.appendChild(cell);
+    });
+
+    resultBody.appendChild(row);
+    resultSection.hidden = false;
+
+    message.textContent = "Result calculated successfully!";
+    message.className = "success";
+
+    form.reset();
+});
+
+form.addEventListener("reset", function() {
+    message.textContent = "";
+    message.className = "";
+});
+</script>
+</body>
+</html>
